@@ -18,6 +18,7 @@ const recommendations_1 = __importDefault(require("./routes/recommendations"));
 const batches_1 = __importDefault(require("./routes/batches"));
 const auditLogs_1 = __importDefault(require("./routes/auditLogs"));
 const events_1 = __importDefault(require("./routes/events"));
+const dashboard_routes_1 = __importDefault(require("./routes/dashboard.routes"));
 const auth_2 = require("./middleware/auth");
 const errorHandler_1 = require("./middleware/errorHandler");
 const app = (0, express_1.default)();
@@ -40,6 +41,8 @@ app.get('/health', (_req, res) => {
 });
 /** Core rebalance endpoint */
 app.use('/api/rebalance', rebalance_1.default);
+/** Public Dashboard routes (For immediate integration without auth token barrier, as per specs) */
+app.use('/api/dashboard', dashboard_routes_1.default);
 /** Auth — public endpoints (no authentication required) */
 app.use('/api/auth', auth_1.default);
 /** Protected API routes — all require a valid Bearer JWT */

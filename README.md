@@ -105,6 +105,9 @@ rebalance-engine/
 └── README.md             # This file
 ```
 
+## New Features (v2.0)
+- **Massive 5-Row Dashboard KPI Tracking:** Full-stack implementation featuring complex aggregated React ApexCharts matrices backed by PostgreSQL Drizzle ORM definitions querying live `user_reviews` and `rebalance_actions` models via strict Fastify/Express validation pipelines. Added exhaustive 12-month metrics reporting.
+
 ---
 
 ## License

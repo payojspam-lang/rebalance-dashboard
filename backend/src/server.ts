@@ -14,6 +14,7 @@ import recommendationsRoutes from './routes/recommendations';
 import batchesRoutes from './routes/batches';
 import auditLogsRoutes from './routes/auditLogs';
 import eventsRoutes from './routes/events';
+import dashboardRoutes from './routes/dashboard.routes';
 import { authenticate } from './middleware/auth';
 import { errorHandler } from './middleware/errorHandler';
 
@@ -43,6 +44,9 @@ app.get('/health', (_req, res) => {
 
 /** Core rebalance endpoint */
 app.use('/api/rebalance', rebalanceRoutes);
+
+/** Public Dashboard routes (For immediate integration without auth token barrier, as per specs) */
+app.use('/api/dashboard', dashboardRoutes);
 
 /** Auth — public endpoints (no authentication required) */
 app.use('/api/auth', authRoutes);
