@@ -13,6 +13,7 @@ import {
 import ResearchDashboard from 'views/admin/research-dashboard';
 import RebalancePage from 'views/admin/rebalance';
 import BseOrderFile from 'views/admin/bse-order-file';
+import AuditLog from 'views/admin/audit-log';
 import ConfigurationPage from 'views/admin/configuration';
 import UserDetailPage from 'views/admin/user-detail';
 
@@ -43,7 +44,7 @@ const routes = [
     layout: '/admin',
     path: '/audit-log',
     icon: <Icon as={MdHistory} width="20px" height="20px" color="inherit" />,
-    component: <ResearchDashboard />,
+    component: <AuditLog />,
   },
   {
     name: 'Configuration',

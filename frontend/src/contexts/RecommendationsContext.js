@@ -1,10 +1,22 @@
-import React, { createContext, useContext, useState, useCallback, useMemo } from "react";
+import React, { createContext, useContext, useState, useCallback, useMemo, useRef } from "react";
 import { mockRecommendations } from "views/admin/research-dashboard/variables/mockData";
+import { surbhiRecommendations } from "views/admin/research-dashboard/variables/mockSurbhiData";
 
 const RecommendationsContext = createContext(null);
 
-// Deviation threshold: if amount or qty changes by more than this %, it's a deviation requiring L2.
 const DEVIATION_THRESHOLD_PCT = 5;
+
+// Seed all users' recommendations into a single map.
+// Add more users here as mock data grows.
+const INITIAL_RECS = {
+  "user-001": mockRecommendations,
+  "user-002": surbhiRecommendations,
+};
+
+const INITIAL_STATUSES = {
+  "user-001": "PENDING_REVIEW",
+  "user-002": "PENDING_REVIEW",
+};
 
 function hasDeviation(original, edit) {
   if (edit.action !== original.mlAction) return true;
@@ -20,21 +32,53 @@ function hasDeviation(original, edit) {
 }
 
 export function RecommendationsProvider({ children }) {
-  const [recommendations, setRecommendations] = useState(mockRecommendations);
-  // Request-level status: DRAFT | PENDING_REVIEW | L2_REVIEW | APPROVED | REJECTED | IN_PROGRESS | COMPLETED
-  const [requestStatus, setRequestStatus] = useState("PENDING_REVIEW");
+  const [allUserRecs, setAllUserRecs]       = useState(INITIAL_RECS);
+  const [requestStatuses, setRequestStatuses] = useState(INITIAL_STATUSES);
+  const [activeUserId, setActiveUserIdState]  = useState("user-001");
 
-  const approve = useCallback((id) => {
-    setRecommendations((prev) =>
-      prev.map((r) =>
-        r.id === id ? { ...r, status: "APPROVED", updatedAt: new Date().toISOString() } : r
-      )
-    );
+  // Ref prevents stale closures inside useCallback functions
+  const activeUserIdRef = useRef("user-001");
+
+  const setActiveUser = useCallback((userId) => {
+    setActiveUserIdState(userId);
+    activeUserIdRef.current = userId;
   }, []);
 
+  // Derived slices for the active user — keeps backward-compat with RecommendationsTable
+  const recommendations = useMemo(
+    () => allUserRecs[activeUserId] ?? [],
+    [allUserRecs, activeUserId],
+  );
+  const requestStatus = useMemo(
+    () => requestStatuses[activeUserId] ?? "PENDING_REVIEW",
+    [requestStatuses, activeUserId],
+  );
+
+  // ── Internal helpers ────────────────────────────────────────────────────────
+
+  const updateUserRecs = useCallback((userId, updater) => {
+    setAllUserRecs((prev) => ({ ...prev, [userId]: updater(prev[userId] ?? []) }));
+  }, []);
+
+  const updateUserStatus = useCallback((userId, status) => {
+    setRequestStatuses((prev) => ({ ...prev, [userId]: status }));
+  }, []);
+
+  // ── Mutation actions (all operate on activeUserId) ──────────────────────────
+
+  const approve = useCallback((id) => {
+    const uid = activeUserIdRef.current;
+    updateUserRecs(uid, (recs) =>
+      recs.map((r) =>
+        r.id === id ? { ...r, status: "APPROVED", updatedAt: new Date().toISOString() } : r,
+      ),
+    );
+  }, [updateUserRecs]);
+
   const modify = useCallback((id, { newAction, newAmount, newQty, rationale }) => {
-    setRecommendations((prev) =>
-      prev.map((r) =>
+    const uid = activeUserIdRef.current;
+    updateUserRecs(uid, (recs) =>
+      recs.map((r) =>
         r.id === id
           ? {
               ...r,
@@ -56,15 +100,15 @@ export function RecommendationsProvider({ children }) {
               },
               updatedAt: new Date().toISOString(),
             }
-          : r
-      )
+          : r,
+      ),
     );
-  }, []);
+  }, [updateUserRecs]);
 
-  // Save edits as draft — persists analyst changes without submitting
   const saveDraft = useCallback((edits) => {
-    setRecommendations((prev) =>
-      prev.map((r) => {
+    const uid = activeUserIdRef.current;
+    updateUserRecs(uid, (recs) =>
+      recs.map((r) => {
         const edit = edits[r.id];
         if (!edit || r.status !== "PENDING") return r;
         return {
@@ -75,24 +119,23 @@ export function RecommendationsProvider({ children }) {
           draftNotes: edit.notes ?? r.draftNotes,
           updatedAt: new Date().toISOString(),
         };
-      })
+      }),
     );
-    setRequestStatus("DRAFT");
-  }, []);
+    updateUserStatus(uid, "DRAFT");
+  }, [updateUserRecs, updateUserStatus]);
 
-  // Submit request — changed items go to L2, unchanged items are approved
   const submitRequest = useCallback((edits) => {
+    const uid = activeUserIdRef.current;
     let anyDeviation = false;
-    setRecommendations((prev) =>
-      prev.map((r) => {
+    updateUserRecs(uid, (recs) =>
+      recs.map((r) => {
         if (r.status !== "PENDING") return r;
-        const edit = edits[r.id] || {};
+        const edit   = edits[r.id] || {};
         const action = edit.action ?? r.mlAction;
         const amount = edit.amount ?? r.mlAmount;
-        const qty = edit.qty ?? r.mlQty;
-        const notes = (edit.notes ?? "").trim();
+        const qty    = edit.qty    ?? r.mlQty;
+        const notes  = (edit.notes ?? "").trim();
         const deviated = hasDeviation(r, { action, amount, qty });
-
         if (deviated) {
           anyDeviation = true;
           return {
@@ -124,21 +167,21 @@ export function RecommendationsProvider({ children }) {
           qty,
           updatedAt: new Date().toISOString(),
         };
-      })
+      }),
     );
-    setRequestStatus(anyDeviation ? "L2_REVIEW" : "APPROVED");
-  }, []);
+    updateUserStatus(uid, anyDeviation ? "L2_REVIEW" : "APPROVED");
+  }, [updateUserRecs, updateUserStatus]);
 
-  // Explicitly submit all pending items for L2 review
   const submitForReview = useCallback((edits) => {
-    setRecommendations((prev) =>
-      prev.map((r) => {
+    const uid = activeUserIdRef.current;
+    updateUserRecs(uid, (recs) =>
+      recs.map((r) => {
         if (r.status !== "PENDING") return r;
-        const edit = edits[r.id] || {};
+        const edit   = edits[r.id] || {};
         const action = edit.action ?? r.mlAction;
         const amount = edit.amount ?? r.mlAmount;
-        const qty = edit.qty ?? r.mlQty;
-        const notes = (edit.notes ?? "").trim();
+        const qty    = edit.qty    ?? r.mlQty;
+        const notes  = (edit.notes ?? "").trim();
         return {
           ...r,
           status: "L2_PENDING",
@@ -159,72 +202,92 @@ export function RecommendationsProvider({ children }) {
           },
           updatedAt: new Date().toISOString(),
         };
-      })
+      }),
     );
-    setRequestStatus("L2_REVIEW");
-  }, []);
+    updateUserStatus(uid, "L2_REVIEW");
+  }, [updateUserRecs, updateUserStatus]);
 
   const l2Approve = useCallback((id, comment) => {
-    setRecommendations((prev) =>
-      prev.map((r) =>
+    const uid = activeUserIdRef.current;
+    updateUserRecs(uid, (recs) =>
+      recs.map((r) =>
         r.id === id
           ? {
               ...r,
               status: "APPROVED",
               recommendedAction: r.modification?.newAction ?? r.recommendedAction,
               amount: r.modification?.newAmount ?? r.amount,
-              qty: r.modification?.newQty ?? r.qty,
+              qty:    r.modification?.newQty    ?? r.qty,
               l2Comment: comment,
               updatedAt: new Date().toISOString(),
             }
-          : r
-      )
+          : r,
+      ),
     );
-  }, []);
+  }, [updateUserRecs]);
 
   const l2Reject = useCallback((id, reason) => {
-    setRecommendations((prev) =>
-      prev.map((r) =>
+    const uid = activeUserIdRef.current;
+    updateUserRecs(uid, (recs) =>
+      recs.map((r) =>
         r.id === id
-          ? {
-              ...r,
-              status: "REJECTED",
-              rejectionReason: reason,
-              updatedAt: new Date().toISOString(),
-            }
-          : r
-      )
+          ? { ...r, status: "REJECTED", rejectionReason: reason, updatedAt: new Date().toISOString() }
+          : r,
+      ),
     );
-  }, []);
+  }, [updateUserRecs]);
 
-  // Ops: move all APPROVED → IN_PROGRESS
+  // ── Batch operations (span ALL users) ──────────────────────────────────────
+
   const startBatch = useCallback(() => {
-    setRecommendations((prev) =>
-      prev.map((r) =>
-        r.status === "APPROVED"
-          ? { ...r, status: "IN_PROGRESS", batchedAt: new Date().toISOString() }
-          : r
-      )
-    );
-    setRequestStatus("IN_PROGRESS");
+    setAllUserRecs((prev) => {
+      const next = {};
+      for (const [uid, recs] of Object.entries(prev)) {
+        next[uid] = recs.map((r) =>
+          r.status === "APPROVED"
+            ? { ...r, status: "IN_PROGRESS", batchedAt: new Date().toISOString() }
+            : r,
+        );
+      }
+      return next;
+    });
+    setRequestStatuses((prev) => {
+      const next = {};
+      for (const [uid, s] of Object.entries(prev)) {
+        next[uid] = s === "APPROVED" ? "IN_PROGRESS" : s;
+      }
+      return next;
+    });
   }, []);
 
-  // Ops: move all IN_PROGRESS → COMPLETED
   const completeBatch = useCallback(() => {
-    setRecommendations((prev) =>
-      prev.map((r) =>
-        r.status === "IN_PROGRESS"
-          ? { ...r, status: "COMPLETED", completedAt: new Date().toISOString() }
-          : r
-      )
-    );
-    setRequestStatus("COMPLETED");
+    setAllUserRecs((prev) => {
+      const next = {};
+      for (const [uid, recs] of Object.entries(prev)) {
+        next[uid] = recs.map((r) =>
+          r.status === "IN_PROGRESS"
+            ? { ...r, status: "COMPLETED", completedAt: new Date().toISOString() }
+            : r,
+        );
+      }
+      return next;
+    });
+    setRequestStatuses((prev) => {
+      const next = {};
+      for (const [uid, s] of Object.entries(prev)) {
+        next[uid] = s === "IN_PROGRESS" ? "COMPLETED" : s;
+      }
+      return next;
+    });
   }, []);
 
   const value = useMemo(
     () => ({
-      recommendations,
-      requestStatus,
+      recommendations,  // active user's recs (backward-compat)
+      requestStatus,    // active user's status (backward-compat)
+      allUserRecs,      // full map — used by BSE Order File
+      activeUserId,
+      setActiveUser,
       approve,
       modify,
       saveDraft,
@@ -235,7 +298,8 @@ export function RecommendationsProvider({ children }) {
       startBatch,
       completeBatch,
     }),
-    [recommendations, requestStatus, approve, modify, saveDraft, submitRequest, submitForReview, l2Approve, l2Reject, startBatch, completeBatch]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [recommendations, requestStatus, allUserRecs, activeUserId],
   );
 
   return (

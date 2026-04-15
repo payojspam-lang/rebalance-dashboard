@@ -7,9 +7,199 @@ import {
   FormControl, FormLabel, SimpleGrid,
 } from "@chakra-ui/react";
 import React, { useState, useRef, useMemo } from "react";
-import { MdAdd, MdDelete, MdCalendarToday, MdChevronLeft, MdChevronRight } from "react-icons/md";
+import { MdAdd, MdDelete, MdCalendarToday } from "react-icons/md";
 import Card from "components/card/Card";
 import { useHolidays } from "contexts/HolidayContext";
+
+// ── Risk Mandate Profiles data ───────────────────────────────────────────────
+const RISK_MANDATES = [
+  { name: "Conservative", largeCap: 60, midCap: 10,  smallCap: 0,  gold: 5,  debt: 25, thematic: 0  },
+  { name: "Low",          largeCap: 50, midCap: 15,  smallCap: 5,  gold: 5,  debt: 25, thematic: 0  },
+  { name: "Moderate",     largeCap: 45, midCap: 20,  smallCap: 10, gold: 5,  debt: 20, thematic: 0  },
+  { name: "High",         largeCap: 40, midCap: 25,  smallCap: 15, gold: 5,  debt: 15, thematic: 0  },
+  { name: "Aggressive",   largeCap: 41, midCap: 25,  smallCap: 17, gold: 1,  debt: 16, thematic: 0  },
+];
+
+const MANDATE_COLOR = {
+  Conservative: "green",
+  Low:          "teal",
+  Moderate:     "blue",
+  High:         "orange",
+  Aggressive:   "purple",
+};
+
+// ── Fund Universe data ────────────────────────────────────────────────────────
+const FUND_UNIVERSE = [
+  {
+    name:   "Nippon India Large Cap Fund",
+    isin:   "INF204K01BE9",
+    bucket: "Large Cap",
+    rating: 5,
+    rank:   2,
+  },
+  {
+    name:   "HSBC Midcap Fund",
+    isin:   "INF336L01627",
+    bucket: "Mid Cap",
+    rating: 4,
+    rank:   1,
+  },
+  {
+    name:   "BANDHAN Small Cap Fund",
+    isin:   "INF194KB1JL1",
+    bucket: "Small Cap",
+    rating: 4,
+    rank:   3,
+  },
+];
+
+const BUCKET_COLOR = {
+  "Large Cap":  "blue",
+  "Mid Cap":    "orange",
+  "Small Cap":  "purple",
+};
+
+function StarRating({ rating }) {
+  return (
+    <Flex gap="1px">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <Text key={i} fontSize="sm" color={i <= rating ? "yellow.400" : "gray.300"}>
+          ★
+        </Text>
+      ))}
+    </Flex>
+  );
+}
+
+// ── Risk Mandate Profiles tab ────────────────────────────────────────────────
+function RiskMandatesTab() {
+  const textColor   = useColorModeValue("gray.800", "white");
+  const borderColor = useColorModeValue("gray.200", "whiteAlpha.100");
+  const subColor    = useColorModeValue("gray.500", "gray.400");
+  const headerBg    = useColorModeValue("gray.50", "navy.800");
+
+  return (
+    <Box>
+      <Card px="0px" overflowX="auto">
+        <Flex px="20px" pt="16px" pb="12px" align="center" justify="space-between">
+          <Box>
+            <Text fontWeight="700" color={textColor} fontSize="md">Risk Mandate Profiles</Text>
+            <Text fontSize="sm" color={subColor} mt="2px">
+              Target asset allocation by risk profile (read-only)
+            </Text>
+          </Box>
+          <Badge colorScheme="gray" borderRadius="full" fontSize="xs">Read Only</Badge>
+        </Flex>
+        <Divider />
+        <Table variant="simple" size="sm">
+          <Thead bg={headerBg}>
+            <Tr>
+              {["Mandate", "Large Cap %", "Mid Cap %", "Small Cap %", "Gold %", "Debt %", "Thematic %"].map((h) => (
+                <Th
+                  key={h}
+                  borderColor={borderColor}
+                  color={subColor}
+                  fontSize="xs"
+                  textTransform="uppercase"
+                  letterSpacing="wider"
+                  py="12px"
+                  px="20px"
+                >
+                  {h}
+                </Th>
+              ))}
+            </Tr>
+          </Thead>
+          <Tbody>
+            {RISK_MANDATES.map((m) => (
+              <Tr key={m.name}>
+                <Td px="20px" py="12px" borderColor={borderColor}>
+                  <Badge colorScheme={MANDATE_COLOR[m.name]} borderRadius="full" px="2" fontSize="xs">
+                    {m.name}
+                  </Badge>
+                </Td>
+                <Td borderColor={borderColor} py="12px" fontSize="sm" color={textColor} isNumeric>{m.largeCap}%</Td>
+                <Td borderColor={borderColor} py="12px" fontSize="sm" color={textColor} isNumeric>{m.midCap}%</Td>
+                <Td borderColor={borderColor} py="12px" fontSize="sm" color={textColor} isNumeric>{m.smallCap}%</Td>
+                <Td borderColor={borderColor} py="12px" fontSize="sm" color={textColor} isNumeric>{m.gold}%</Td>
+                <Td borderColor={borderColor} py="12px" fontSize="sm" color={textColor} isNumeric>{m.debt}%</Td>
+                <Td borderColor={borderColor} py="12px" fontSize="sm" color={textColor} isNumeric>{m.thematic}%</Td>
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+      </Card>
+    </Box>
+  );
+}
+
+// ── Fund Universe tab ────────────────────────────────────────────────────────
+function FundUniverseTab() {
+  const textColor   = useColorModeValue("gray.800", "white");
+  const borderColor = useColorModeValue("gray.200", "whiteAlpha.100");
+  const subColor    = useColorModeValue("gray.500", "gray.400");
+  const headerBg    = useColorModeValue("gray.50", "navy.800");
+
+  return (
+    <Box>
+      <Card px="0px" overflowX="auto">
+        <Flex px="20px" pt="16px" pb="12px" align="center" justify="space-between">
+          <Box>
+            <Text fontWeight="700" color={textColor} fontSize="md">Fund Universe</Text>
+            <Text fontSize="sm" color={subColor} mt="2px">
+              Approved buy-candidate funds with ratings and allocation buckets (read-only)
+            </Text>
+          </Box>
+          <Badge colorScheme="gray" borderRadius="full" fontSize="xs">Read Only</Badge>
+        </Flex>
+        <Divider />
+        <Table variant="simple" size="sm">
+          <Thead bg={headerBg}>
+            <Tr>
+              {["Fund Name", "ISIN", "Bucket", "Rating", "Rank"].map((h) => (
+                <Th
+                  key={h}
+                  borderColor={borderColor}
+                  color={subColor}
+                  fontSize="xs"
+                  textTransform="uppercase"
+                  letterSpacing="wider"
+                  py="12px"
+                  px="20px"
+                >
+                  {h}
+                </Th>
+              ))}
+            </Tr>
+          </Thead>
+          <Tbody>
+            {FUND_UNIVERSE.map((f) => (
+              <Tr key={f.isin}>
+                <Td px="20px" py="14px" borderColor={borderColor} fontSize="sm" color={textColor} fontWeight="600">
+                  {f.name}
+                </Td>
+                <Td borderColor={borderColor} py="14px" fontSize="xs" color={subColor} fontFamily="mono">
+                  {f.isin}
+                </Td>
+                <Td borderColor={borderColor} py="14px">
+                  <Badge colorScheme={BUCKET_COLOR[f.bucket] ?? "gray"} borderRadius="full" px="2" fontSize="xs">
+                    {f.bucket}
+                  </Badge>
+                </Td>
+                <Td borderColor={borderColor} py="14px">
+                  <StarRating rating={f.rating} />
+                </Td>
+                <Td borderColor={borderColor} py="14px" fontSize="sm" color={textColor}>
+                  #{f.rank}
+                </Td>
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+      </Card>
+    </Box>
+  );
+}
 
 const CURRENT_YEAR = new Date().getFullYear();
 const NEXT_YEAR = CURRENT_YEAR + 1;
@@ -240,15 +430,26 @@ export default function ConfigurationPage() {
       </Box>
 
       <Tabs variant="soft-rounded" colorScheme="brand" isLazy>
-        <TabList mb="20px" gap="8px">
-          <Tab fontSize="sm" fontWeight="600" leftIcon={<MdCalendarToday />}>
+        <TabList mb="20px" gap="8px" flexWrap="wrap">
+          <Tab fontSize="sm" fontWeight="600">
             Holiday Calendar
           </Tab>
-          {/* Future tabs can be added here */}
+          <Tab fontSize="sm" fontWeight="600">
+            Risk Mandates
+          </Tab>
+          <Tab fontSize="sm" fontWeight="600">
+            Fund Universe
+          </Tab>
         </TabList>
         <TabPanels>
           <TabPanel px="0" pt="0">
             <HolidayCalendarTab />
+          </TabPanel>
+          <TabPanel px="0" pt="0">
+            <RiskMandatesTab />
+          </TabPanel>
+          <TabPanel px="0" pt="0">
+            <FundUniverseTab />
           </TabPanel>
         </TabPanels>
       </Tabs>

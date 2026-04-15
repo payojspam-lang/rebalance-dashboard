@@ -8,6 +8,13 @@
 import express from 'express';
 import cors from 'cors';
 import rebalanceRoutes from './routes/rebalance';
+import authRoutes from './routes/auth';
+import portfoliosRoutes from './routes/portfolios';
+import recommendationsRoutes from './routes/recommendations';
+import batchesRoutes from './routes/batches';
+import auditLogsRoutes from './routes/auditLogs';
+import eventsRoutes from './routes/events';
+import { authenticate } from './middleware/auth';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
@@ -37,6 +44,16 @@ app.get('/health', (_req, res) => {
 /** Core rebalance endpoint */
 app.use('/api/rebalance', rebalanceRoutes);
 
+/** Auth — public endpoints (no authentication required) */
+app.use('/api/auth', authRoutes);
+
+/** Protected API routes — all require a valid Bearer JWT */
+app.use('/api/portfolios', authenticate, portfoliosRoutes);
+app.use('/api/recommendations', authenticate, recommendationsRoutes);
+app.use('/api/batches', authenticate, batchesRoutes);
+app.use('/api/audit-logs', authenticate, auditLogsRoutes);
+app.use('/api/events', authenticate, eventsRoutes);
+
 // ---------------------------------------------------------------------------
 // 404 catch-all
 // ---------------------------------------------------------------------------
@@ -59,6 +76,7 @@ app.listen(PORT, () => {
   console.log(`\n🚀 Aegis Rebalance Engine API`);
   console.log(`   Running at: http://localhost:${PORT}`);
   console.log(`   Health:     http://localhost:${PORT}/health`);
+  console.log(`   Auth:       POST http://localhost:${PORT}/api/auth/login`);
   console.log(`   Rebalance:  POST http://localhost:${PORT}/api/rebalance\n`);
 });
 

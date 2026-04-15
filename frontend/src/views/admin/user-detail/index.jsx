@@ -2,7 +2,7 @@ import {
   Box, Tabs, TabList, Tab, TabPanels, TabPanel,
   Alert, AlertIcon,
 } from "@chakra-ui/react";
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useRecommendations } from "contexts/RecommendationsContext";
 
@@ -10,7 +10,7 @@ import { mockUsers } from "views/admin/research-dashboard/variables/mockData";
 import { portfolioData } from "views/admin/research-dashboard/variables/mockPortfolioData";
 import { mockSellSchedule, mockBuySchedule } from "views/admin/research-dashboard/variables/mockScheduleData";
 import {
-  surbhiRecommendations, surbhiAllocation, surbhiIdealCash, surbhiMandateDetail,
+  surbhiAllocation, surbhiIdealCash, surbhiMandateDetail,
 } from "views/admin/research-dashboard/variables/mockSurbhiData";
 
 import UserDetailHeader       from "./components/UserDetailHeader";
@@ -25,7 +25,12 @@ import BuyScheduleTable       from "views/admin/research-dashboard/components/Bu
 export default function UserDetailPage() {
   const { userId }  = useParams();
   const navigate    = useNavigate();
-  const { recommendations: contextRecs } = useRecommendations();
+  const { recommendations: contextRecs, setActiveUser } = useRecommendations();
+
+  // Tell the context which user is active so mutations go to the right rec set
+  useEffect(() => {
+    setActiveUser(userId);
+  }, [userId, setActiveUser]);
 
   const user      = mockUsers.find((u) => u.id === userId);
   const portfolio = portfolioData[userId];
@@ -46,9 +51,10 @@ export default function UserDetailPage() {
     );
   }
 
-  const isInteractive   = userId === "user-001" || userId === "user-002";
+  const isInteractive = userId === "user-001" || userId === "user-002";
 
-  // user-001 uses context recs, user-002 uses Surbhi's custom data, others use generated
+  // All recommendations come from context — setActiveUser above ensures the right
+  // user's data is active before this renders (second render after the effect fires).
   let recommendations, sellSchedule, buySchedule, mandateDetail, allocation, idealCash;
   if (userId === "user-001") {
     recommendations = contextRecs;
@@ -58,7 +64,7 @@ export default function UserDetailPage() {
     allocation      = portfolio.allocation;
     idealCash       = portfolio.idealCash;
   } else if (userId === "user-002") {
-    recommendations = surbhiRecommendations;
+    recommendations = contextRecs;        // ← live state, not static import
     sellSchedule    = portfolio.sellSchedule;
     buySchedule     = portfolio.buySchedule;
     mandateDetail   = surbhiMandateDetail;

@@ -9,7 +9,12 @@
       "Bash(node -e \"console.log\\(require\\('./node_modules/ajv-keywords/node_modules/ajv/package.json'\\).version\\)\")",
       "Bash(node -e ':*)",
       "Bash(BROWSER=none npm start)",
-      "Bash(npx react-scripts:*)"
+      "Bash(npx react-scripts:*)",
+      "Bash(wc -l /Users/payoj.govindjiwala/rebalance-engine/frontend/src/views/admin/research-dashboard/components/*.js)",
+      "Bash(wc *)",
+      "Bash(npm run *)",
+      "Bash(npm list *)",
+      "Bash(grep -v \"^$\")"
     ]
   }
 }
