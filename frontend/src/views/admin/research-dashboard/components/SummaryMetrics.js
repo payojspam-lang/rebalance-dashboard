@@ -1,10 +1,9 @@
-import { SimpleGrid, Box, Icon, Flex, Text, useColorModeValue } from "@chakra-ui/react";
+import { SimpleGrid, Box, Icon, Text, useColorModeValue } from "@chakra-ui/react";
 import MiniStatistics from "components/card/MiniStatistics";
 import IconBox from "components/icons/IconBox";
-import React, { useMemo } from "react";
+import React from "react";
 import {
-  MdPersonAdd, MdCheckCircle, MdWarning,
-  MdCalendarToday, MdDoneAll, MdSchedule, MdAccountBalance, MdTrendingUp,
+  MdPersonAdd, MdSync, MdTrendingUp, MdAccountBalance,
 } from "react-icons/md";
 
 function formatAUM(v) {
@@ -18,33 +17,28 @@ export default function SummaryMetrics({ metrics }) {
   const boxBg       = useColorModeValue("secondaryGray.300", "whiteAlpha.100");
   const textColor   = useColorModeValue("secondaryGray.900", "white");
 
-  const driftColor = useMemo(
-    () => metrics.portfolio.avgDrift > 7 ? "red.500" : metrics.portfolio.avgDrift > 4 ? "orange.400" : "green.500",
-    [metrics.portfolio.avgDrift]
-  );
-
   return (
     <Box>
       <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} gap="20px" mb="20px">
         <MiniStatistics
-          startContent={<IconBox w="56px" h="56px" bg={boxBg} icon={<Icon w="28px" h="28px" as={MdPersonAdd} color="orange.400" />} />}
-          name="Clients Pending Review"
-          value={<Text fontSize="2xl" fontWeight="700" color={textColor}>{metrics.newUsers.reviewPending}</Text>}
+          startContent={<IconBox w="56px" h="56px" bg={boxBg} icon={<Icon w="28px" h="28px" as={MdPersonAdd} color="brand.500" />} />}
+          name="New Users (Review Needed)"
+          value={<Text fontSize="2xl" fontWeight="700" color={textColor}>{metrics.newUsersPendingReview}</Text>}
         />
         <MiniStatistics
-          startContent={<IconBox w="56px" h="56px" bg={boxBg} icon={<Icon w="28px" h="28px" as={MdWarning} color={metrics.portfolio.criticalAlerts > 0 ? "red.500" : brandColor} />} />}
-          name="Critical Alerts"
-          value={<Text fontSize="2xl" fontWeight="700" color={metrics.portfolio.criticalAlerts > 0 ? "red.500" : "green.500"}>{metrics.portfolio.criticalAlerts}</Text>}
+          startContent={<IconBox w="56px" h="56px" bg={boxBg} icon={<Icon w="28px" h="28px" as={MdSync} color="orange.400" />} />}
+          name="Old Users (Monthly Rebalance)"
+          value={<Text fontSize="2xl" fontWeight="700" color={textColor}>{metrics.oldUsersPendingRebalance}</Text>}
+        />
+        <MiniStatistics
+          startContent={<IconBox w="56px" h="56px" bg={boxBg} icon={<Icon w="28px" h="28px" as={MdTrendingUp} color="green.500" />} />}
+          name="AUM Added (Last 30 Days)"
+          value={<Text fontSize="2xl" fontWeight="700" color="green.500">+{formatAUM(metrics.aumAdded30Days)}</Text>}
         />
         <MiniStatistics
           startContent={<IconBox w="56px" h="56px" bg={boxBg} icon={<Icon w="28px" h="28px" as={MdAccountBalance} color={brandColor} />} />}
-          name="Total AUM Under Review"
-          value={<Text fontSize="2xl" fontWeight="700" color={textColor}>{formatAUM(metrics.portfolio.totalAumUnderReview)}</Text>}
-        />
-        <MiniStatistics
-          startContent={<IconBox w="56px" h="56px" bg={boxBg} icon={<Icon w="28px" h="28px" as={MdTrendingUp} color={driftColor} />} />}
-          name="Firm Avg Portfolio Drift"
-          value={<Text fontSize="2xl" fontWeight="700" color={driftColor}>{metrics.portfolio.avgDrift.toFixed(2)}%</Text>}
+          name="Total AUM"
+          value={<Text fontSize="2xl" fontWeight="700" color={textColor}>{formatAUM(metrics.totalAum)}</Text>}
         />
       </SimpleGrid>
     </Box>
