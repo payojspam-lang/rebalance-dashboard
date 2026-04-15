@@ -543,10 +543,25 @@ export const schemeCodeByIsin = {
 // Summary metrics — cross-portfolio view for the Overview tab
 // ─────────────────────────────────────────────────────────────────────────────
 export const mockSummaryMetrics = {
-  newUsersPendingReview: 8,
-  oldUsersPendingRebalance: 24,
-  aumAdded30Days: 125000000,
+  // AUM
   totalAum: 412500000,
+  aumAdded30Days: 125000000,
+
+  // Core User Count Metrics
+  totalActiveUsers: 142,
+  newUsersAddedMTD: 18,
+  churnedUsers: 2,
+
+  // Review & Workflow Count Metrics
+  newUsersPendingReview: 8,
+  monthlyReviewsPending: 24,
+  newUsersReviewSpillover: 3,
+  monthlyReviewSpillover: 6,
+
+  // Action-Oriented User Count Metrics
+  usersRequiringRebalance: 15,
+  usersWithPendingTrades: 7,
+  usersWithActionAlert: 9,
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
