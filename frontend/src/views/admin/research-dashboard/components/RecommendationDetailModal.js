@@ -84,19 +84,19 @@ export default function RecommendationDetailModal({
     return combined;
   }, [getHolidaySet]);
 
-  // Execution date — recalculated based on the current action
-  const execInfo = useMemo(() => {
-    const action = localAction || "SELL";
-    const bseAction = action === "TRIM" ? "SELL" : action;
-    return calcExecutionDate(bseAction, new Date(), holidaySet);
-  }, [localAction, holidaySet]);
-
   // Local copy of edits for the modal — sync'd from parent on open
   const [localAction, setLocalAction] = useState("");
   const [localAmount, setLocalAmount] = useState(0);
   const [localQty,    setLocalQty]    = useState(0);
   const [localNotes,  setLocalNotes]  = useState("");
   const [localPct,    setLocalPct]    = useState(0);
+
+  // Execution date — recalculated based on the current action
+  const execInfo = useMemo(() => {
+    const action = localAction || "SELL";
+    const bseAction = action === "TRIM" ? "SELL" : action;
+    return calcExecutionDate(bseAction, new Date(), holidaySet);
+  }, [localAction, holidaySet]);
 
   useEffect(() => {
     if (rec && isOpen) {
