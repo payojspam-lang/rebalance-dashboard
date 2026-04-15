@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 110" width="420" height="110">
+  <defs>
+    <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6C63FF"/>
+      <stop offset="100%" style="stop-color:#3ECFCF"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="5" width="90" height="90" rx="18" fill="#0F0F1A"/>
+  <polyline points="14,25 34,25 46,60 58,25 78,25"
+            stroke="url(#g2)" stroke-width="6" fill="none"
+            stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="46" cy="63" r="4" fill="#3ECFCF"/>
+  <polygon points="46,74 51,84 41,84" fill="#6C63FF" opacity="0.6"/>
+  <text x="102" y="50" font-family="'Segoe UI', Arial, sans-serif"
+        font-size="34" font-weight="900" fill="url(#g2)" letter-spacing="3">VANTAGE</text>
+  <line x1="102" y1="60" x2="360" y2="60" stroke="#6C63FF" stroke-width="1" opacity="0.4"/>
+  <text x="103" y="76" font-family="'Segoe UI', Arial, sans-serif"
+        font-size="10" fill="#888" letter-spacing="3.5" font-weight="300">REBALANCING  DASHBOARD</text>
+</svg>

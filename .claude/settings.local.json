@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(node -e \"console.log\\(require\\('./node_modules/ajv/package.json'\\).version\\)\")",
+      "Bash(node -e \" const lock = require\\('./node_modules/.package-lock.json'\\); const ajvEntries = Object.entries\\(lock.packages\\).filter\\(\\([k]\\) => k.includes\\('/ajv/'\\) || k === 'node_modules/ajv'\\); ajvEntries.forEach\\(\\([k, v]\\) => console.log\\(k, v.version\\)\\); \")",
+      "Bash(npm ls:*)",
+      "Bash(node -e \"console.log\\(require\\('./node_modules/schema-utils/package.json'\\).version\\)\")",
+      "Bash(node -e \"console.log\\(require\\('./node_modules/ajv-keywords/node_modules/ajv/package.json'\\).version\\)\")",
+      "Bash(node -e ':*)",
+      "Bash(BROWSER=none npm start)",
+      "Bash(npx react-scripts:*)"
+    ]
+  }
+}
