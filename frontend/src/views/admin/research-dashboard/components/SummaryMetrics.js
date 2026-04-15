@@ -25,102 +25,26 @@ export default function SummaryMetrics({ metrics }) {
 
   return (
     <Box>
-      {/* ── Row 1: New client reviews ─────────────────────── */}
-      <Text color={textColor} fontSize="sm" fontWeight="700" mb="10px" textTransform="uppercase" letterSpacing="wider">
-        New Client Reviews
-      </Text>
-      <SimpleGrid columns={{ base: 1, md: 3 }} gap="20px" mb="24px">
+      <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} gap="20px" mb="20px">
         <MiniStatistics
-          startContent={
-            <IconBox w="56px" h="56px" bg={boxBg}
-              icon={<Icon w="28px" h="28px" as={MdPersonAdd} color="orange.400" />} />
-          }
-          name="Pending Review"
-          value={metrics.newUsers.reviewPending}
+          startContent={<IconBox w="56px" h="56px" bg={boxBg} icon={<Icon w="28px" h="28px" as={MdPersonAdd} color="orange.400" />} />}
+          name="Clients Pending Review"
+          value={<Text fontSize="2xl" fontWeight="700" color={textColor}>{metrics.newUsers.reviewPending}</Text>}
         />
         <MiniStatistics
-          startContent={
-            <IconBox w="56px" h="56px" bg={boxBg}
-              icon={<Icon w="28px" h="28px" as={MdCheckCircle} color="green.400" />} />
-          }
-          name="Review Done"
-          value={metrics.newUsers.reviewDone}
-        />
-        <MiniStatistics
-          startContent={
-            <IconBox w="56px" h="56px" bg={boxBg}
-              icon={<Icon w="28px" h="28px" as={MdWarning}
-                color={metrics.portfolio.criticalAlerts > 0 ? "red.500" : brandColor} />} />
-          }
+          startContent={<IconBox w="56px" h="56px" bg={boxBg} icon={<Icon w="28px" h="28px" as={MdWarning} color={metrics.portfolio.criticalAlerts > 0 ? "red.500" : brandColor} />} />}
           name="Critical Alerts"
-          value={
-            <Text fontSize="2xl" fontWeight="700"
-              color={metrics.portfolio.criticalAlerts > 0 ? "red.500" : "green.500"}>
-              {metrics.portfolio.criticalAlerts}
-            </Text>
-          }
-        />
-      </SimpleGrid>
-
-      {/* ── Row 2: Monthly reviews ────────────────────────── */}
-      <Text color={textColor} fontSize="sm" fontWeight="700" mb="10px" textTransform="uppercase" letterSpacing="wider">
-        Monthly Reviews — Today
-      </Text>
-      <SimpleGrid columns={{ base: 2, md: 5 }} gap="20px">
-        <MiniStatistics
-          startContent={
-            <IconBox w="56px" h="56px" bg={boxBg}
-              icon={<Icon w="28px" h="28px" as={MdCalendarToday} color="blue.400" />} />
-          }
-          name="Pending Today"
-          value={
-            <Text fontSize="2xl" fontWeight="700"
-              color={metrics.monthlyReview.pendingToday > 0 ? "blue.500" : "gray.400"}>
-              {metrics.monthlyReview.pendingToday}
-            </Text>
-          }
+          value={<Text fontSize="2xl" fontWeight="700" color={metrics.portfolio.criticalAlerts > 0 ? "red.500" : "green.500"}>{metrics.portfolio.criticalAlerts}</Text>}
         />
         <MiniStatistics
-          startContent={
-            <IconBox w="56px" h="56px" bg={boxBg}
-              icon={<Icon w="28px" h="28px" as={MdDoneAll} color="green.400" />} />
-          }
-          name="Completed Today"
-          value={metrics.monthlyReview.doneToday}
+          startContent={<IconBox w="56px" h="56px" bg={boxBg} icon={<Icon w="28px" h="28px" as={MdAccountBalance} color={brandColor} />} />}
+          name="Total AUM Under Review"
+          value={<Text fontSize="2xl" fontWeight="700" color={textColor}>{formatAUM(metrics.portfolio.totalAumUnderReview)}</Text>}
         />
         <MiniStatistics
-          startContent={
-            <IconBox w="56px" h="56px" bg={boxBg}
-              icon={<Icon w="28px" h="28px" as={MdSchedule}
-                color={metrics.monthlyReview.spillover > 0 ? "orange.400" : brandColor} />} />
-          }
-          name="Spillover"
-          value={
-            <Text fontSize="2xl" fontWeight="700"
-              color={metrics.monthlyReview.spillover > 0 ? "orange.500" : "gray.400"}>
-              {metrics.monthlyReview.spillover}
-            </Text>
-          }
-        />
-        <MiniStatistics
-          startContent={
-            <IconBox w="56px" h="56px" bg={boxBg}
-              icon={<Icon w="28px" h="28px" as={MdAccountBalance} color={brandColor} />} />
-          }
-          name="AUM Under Review"
-          value={formatAUM(metrics.portfolio.totalAumUnderReview)}
-        />
-        <MiniStatistics
-          startContent={
-            <IconBox w="56px" h="56px" bg={boxBg}
-              icon={<Icon w="28px" h="28px" as={MdTrendingUp} color={driftColor} />} />
-          }
-          name="Avg Portfolio Drift"
-          value={
-            <Text fontSize="2xl" fontWeight="700" color={driftColor}>
-              {metrics.portfolio.avgDrift.toFixed(2)}%
-            </Text>
-          }
+          startContent={<IconBox w="56px" h="56px" bg={boxBg} icon={<Icon w="28px" h="28px" as={MdTrendingUp} color={driftColor} />} />}
+          name="Firm Avg Portfolio Drift"
+          value={<Text fontSize="2xl" fontWeight="700" color={driftColor}>{metrics.portfolio.avgDrift.toFixed(2)}%</Text>}
         />
       </SimpleGrid>
     </Box>

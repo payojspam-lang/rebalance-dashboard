@@ -19,12 +19,6 @@ export default function ResearchDashboard() {
       {/* Row 1 — Summary KPIs */}
       <SummaryMetrics metrics={mockSummaryMetrics} />
 
-      {/* Row 2 — Allocation chart + Drift overview */}
-      <SimpleGrid columns={{ base: 1, xl: 2 }} gap="20px" mb="20px">
-        <AllocationChart allocation={mockAllocation} />
-        <DriftOverviewCard users={mockUsers} />
-      </SimpleGrid>
-
       {/* Row 3 — Full user list */}
       <UserList users={mockUsers} onRowClick={handleRowClick} />
     </Box>
