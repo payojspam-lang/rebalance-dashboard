@@ -2,6 +2,9 @@
 /**
  * portfoliosService.ts
  * In-memory portfolio store.
+ *
+ * Bug 4 fix: Added `driftThreshold` and `allocationSummary` fields
+ * that apidoc section 4.4 requires in GET /portfolios responses.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.listPortfolios = listPortfolios;
@@ -16,10 +19,15 @@ const portfolios = [
         name: 'Rahul Mehta',
         totalAum: 8418710,
         mandateType: 'Aggressive',
-        currentDrift: 8.83,
+        driftThreshold: 0.05,
+        currentDrift: 0.0883,
         driftStatus: 'WARNING',
+        allocationSummary: [
+            { assetName: 'Franklin India ELSS Tax Saver', currentWeight: 0.1373, targetWeight: 0.0 },
+            { assetName: 'HDFC Mid Cap Fund', currentWeight: 0.2253, targetWeight: 0.3000 },
+            { assetName: 'Nippon India Large Cap Fund', currentWeight: 0.0, targetWeight: 0.1341 },
+        ],
         pendingRecommendations: 14,
-        createdAt: NOW,
         updatedAt: NOW,
     },
     {
@@ -27,10 +35,14 @@ const portfolios = [
         name: 'Surbhi Jain',
         totalAum: 5200000,
         mandateType: 'Moderate',
-        currentDrift: 3.2,
+        driftThreshold: 0.05,
+        currentDrift: 0.032,
         driftStatus: 'OK',
+        allocationSummary: [
+            { assetName: 'Axis Bluechip Fund', currentWeight: 0.15, targetWeight: 0.45 },
+            { assetName: 'HDFC Small Cap Fund', currentWeight: 0.08, targetWeight: 0.15 },
+        ],
         pendingRecommendations: 6,
-        createdAt: NOW,
         updatedAt: NOW,
     },
     {
@@ -38,10 +50,14 @@ const portfolios = [
         name: 'Amit Shah',
         totalAum: 12000000,
         mandateType: 'Conservative',
-        currentDrift: 1.5,
+        driftThreshold: 0.03,
+        currentDrift: 0.015,
         driftStatus: 'OK',
+        allocationSummary: [
+            { assetName: 'SBI Bluechip Fund', currentWeight: 0.60, targetWeight: 0.60 },
+            { assetName: 'HDFC Short Term Debt Fund', currentWeight: 0.25, targetWeight: 0.25 },
+        ],
         pendingRecommendations: 2,
-        createdAt: NOW,
         updatedAt: NOW,
     },
 ];

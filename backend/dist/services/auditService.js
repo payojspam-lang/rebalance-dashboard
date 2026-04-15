@@ -3,8 +3,8 @@
  * auditService.ts
  * In-memory audit log store.
  *
- * Seeded with 10 initial entries reflecting the rec-003 approval in the
- * recommendations seed data, plus additional historical transitions.
+ * Bug 5 fix: Renamed `timestamp` → `createdAt` to match apidoc section 4.5.
+ *            Added `ipAddress` field.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addAuditLog = addAuditLog;
@@ -30,7 +30,8 @@ const auditLogs = [
         userId: 'u-002',
         userName: 'Arjun Kapoor',
         details: { previousStatus: 'PENDING', newStatus: 'APPROVED' },
-        timestamp: d(5),
+        ipAddress: '192.168.1.10',
+        createdAt: d(5),
     },
     {
         id: 'alog-002',
@@ -39,8 +40,9 @@ const auditLogs = [
         resourceId: 'u-001',
         userId: 'u-001',
         userName: 'Priya Sharma',
-        details: { ip: '127.0.0.1' },
-        timestamp: d(5),
+        details: {},
+        ipAddress: '192.168.1.11',
+        createdAt: d(5),
     },
     {
         id: 'alog-003',
@@ -49,8 +51,9 @@ const auditLogs = [
         resourceId: 'u-002',
         userId: 'u-002',
         userName: 'Arjun Kapoor',
-        details: { ip: '127.0.0.1' },
-        timestamp: d(4),
+        details: {},
+        ipAddress: '192.168.1.10',
+        createdAt: d(4),
     },
     {
         id: 'alog-004',
@@ -60,7 +63,8 @@ const auditLogs = [
         userId: 'u-001',
         userName: 'Priya Sharma',
         details: { previousStatus: 'PENDING', newStatus: 'L2_PENDING', rationale: 'Reduce sell quantity' },
-        timestamp: d(4),
+        ipAddress: '192.168.1.11',
+        createdAt: d(4),
     },
     {
         id: 'alog-005',
@@ -70,7 +74,8 @@ const auditLogs = [
         userId: 'u-002',
         userName: 'Arjun Kapoor',
         details: { previousStatus: 'L2_PENDING', newStatus: 'REJECTED', reason: 'Client objected' },
-        timestamp: d(3),
+        ipAddress: '192.168.1.10',
+        createdAt: d(3),
     },
     {
         id: 'alog-006',
@@ -80,7 +85,8 @@ const auditLogs = [
         userId: 'u-001',
         userName: 'Priya Sharma',
         details: { previousStatus: 'REJECTED', newStatus: 'PENDING' },
-        timestamp: d(3),
+        ipAddress: '192.168.1.11',
+        createdAt: d(3),
     },
     {
         id: 'alog-007',
@@ -90,7 +96,8 @@ const auditLogs = [
         userId: 'u-001',
         userName: 'Priya Sharma',
         details: { previousStatus: 'PENDING', newStatus: 'APPROVED' },
-        timestamp: d(2),
+        ipAddress: '192.168.1.11',
+        createdAt: d(2),
     },
     {
         id: 'alog-008',
@@ -100,7 +107,8 @@ const auditLogs = [
         userId: 'u-003',
         userName: 'Rahul Verma',
         details: { itemCount: 2, recommendationIds: ['rec-003', 'rec-004'] },
-        timestamp: d(2),
+        ipAddress: '192.168.1.12',
+        createdAt: d(2),
     },
     {
         id: 'alog-009',
@@ -110,7 +118,8 @@ const auditLogs = [
         userId: 'u-003',
         userName: 'Rahul Verma',
         details: { notes: 'All BSE orders submitted successfully.' },
-        timestamp: d(1),
+        ipAddress: '192.168.1.12',
+        createdAt: d(1),
     },
     {
         id: 'alog-010',
@@ -119,8 +128,9 @@ const auditLogs = [
         resourceId: 'u-003',
         userId: 'u-003',
         userName: 'Rahul Verma',
-        details: { ip: '127.0.0.1' },
-        timestamp: d(1),
+        details: {},
+        ipAddress: '192.168.1.12',
+        createdAt: d(1),
     },
 ];
 // ---------------------------------------------------------------------------
@@ -130,30 +140,27 @@ function addAuditLog(entry) {
     const log = {
         ...entry,
         id: makeId(),
-        timestamp: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
     };
     auditLogs.push(log);
     return log;
 }
 function listAuditLogs(filters) {
     const { resourceType, resourceId, userId, startDate, endDate, page = 1, pageSize = 50, } = filters;
-    let results = [...auditLogs].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-    if (resourceType) {
+    let results = [...auditLogs].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    if (resourceType)
         results = results.filter((l) => l.resourceType === resourceType);
-    }
-    if (resourceId) {
+    if (resourceId)
         results = results.filter((l) => l.resourceId === resourceId);
-    }
-    if (userId) {
+    if (userId)
         results = results.filter((l) => l.userId === userId);
-    }
     if (startDate) {
         const start = new Date(startDate).getTime();
-        results = results.filter((l) => new Date(l.timestamp).getTime() >= start);
+        results = results.filter((l) => new Date(l.createdAt).getTime() >= start);
     }
     if (endDate) {
         const end = new Date(endDate).getTime();
-        results = results.filter((l) => new Date(l.timestamp).getTime() <= end);
+        results = results.filter((l) => new Date(l.createdAt).getTime() <= end);
     }
     const totalCount = results.length;
     const totalPages = Math.ceil(totalCount / pageSize) || 1;

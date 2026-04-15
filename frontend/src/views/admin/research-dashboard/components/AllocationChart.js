@@ -5,6 +5,9 @@ import Chart from "react-apexcharts";
 
 export default function AllocationChart({ allocation = [], standalone = true }) {
   const textColor = useColorModeValue("secondaryGray.900", "white");
+  const dataLabelColor = useColorModeValue("#334155", "#E2E8F0");
+  const legendLabelColor = useColorModeValue("#334155", "#E2E8F0");
+  const tooltipTheme = useColorModeValue("light", "dark");
 
   // Memoize so ApexCharts never sees new object references unless allocation data changes
   const categories = useMemo(() => allocation.map((d) => d.category), [allocation]);
@@ -32,7 +35,7 @@ export default function AllocationChart({ allocation = [], standalone = true }) 
       enabled: true,
       formatter: (val) => `${val.toFixed(1)}%`,
       offsetY: -18,
-      style: { fontSize: "10px", colors: ["#334155"] },
+      style: { fontSize: "10px", colors: [dataLabelColor] },
     },
     stroke: { show: false },
     xaxis: {
@@ -61,14 +64,14 @@ export default function AllocationChart({ allocation = [], standalone = true }) 
       position: "top",
       horizontalAlign: "right",
       fontSize: "12px",
-      labels: { colors: "#334155" },
+      labels: { colors: legendLabelColor },
       markers: { radius: 12 },
     },
     tooltip: {
-      theme: "light",
+      theme: tooltipTheme,
       y: { formatter: (val) => `${val.toFixed(2)}%` },
     },
-  }), [categories]);
+  }), [categories, dataLabelColor, legendLabelColor, tooltipTheme]);
 
   const chartEl = (
     <Chart options={options} series={series} type="bar" width="100%" height={260} />

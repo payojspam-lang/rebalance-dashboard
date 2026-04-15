@@ -420,37 +420,18 @@ function HolidayCalendarTab() {
 
 // ── Main Configuration page ─────────────────────────────────────────────────
 export default function ConfigurationPage() {
-  const textColor = useColorModeValue("gray.800", "white");
-
   return (
     <Box pt={{ base: "130px", md: "80px", xl: "80px" }}>
-      <Box mb="24px">
-        <Text color={textColor} fontSize="2xl" fontWeight="700">Configuration</Text>
-        <Text color="gray.500" fontSize="sm">Manage system settings and market calendars.</Text>
-      </Box>
-
       <Tabs variant="soft-rounded" colorScheme="brand" isLazy>
         <TabList mb="20px" gap="8px" flexWrap="wrap">
-          <Tab fontSize="sm" fontWeight="600">
-            Holiday Calendar
-          </Tab>
-          <Tab fontSize="sm" fontWeight="600">
-            Risk Mandates
-          </Tab>
-          <Tab fontSize="sm" fontWeight="600">
-            Fund Universe
-          </Tab>
+          <Tab fontSize="sm" fontWeight="600">Holiday Calendar</Tab>
+          <Tab fontSize="sm" fontWeight="600">Risk Mandates</Tab>
+          <Tab fontSize="sm" fontWeight="600">Fund Universe</Tab>
         </TabList>
         <TabPanels>
-          <TabPanel px="0" pt="0">
-            <HolidayCalendarTab />
-          </TabPanel>
-          <TabPanel px="0" pt="0">
-            <RiskMandatesTab />
-          </TabPanel>
-          <TabPanel px="0" pt="0">
-            <FundUniverseTab />
-          </TabPanel>
+          <TabPanel px="0" pt="0"><HolidayCalendarTab /></TabPanel>
+          <TabPanel px="0" pt="0"><RiskMandatesTab /></TabPanel>
+          <TabPanel px="0" pt="0"><FundUniverseTab /></TabPanel>
         </TabPanels>
       </Tabs>
     </Box>

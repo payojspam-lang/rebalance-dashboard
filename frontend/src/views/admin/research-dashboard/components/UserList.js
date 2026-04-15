@@ -289,7 +289,7 @@ export default function UserList({ users, onRowClick }) {
       {/* ── Header ── */}
       <Flex px="25px" pt="20px" pb="16px" justify="space-between" align="center">
         <Box>
-          <Text color={textColor} fontSize="22px" fontWeight="700">Rebalance Queue</Text>
+          <Text color={textColor} fontSize="22px" fontWeight="700">Client List</Text>
           <Text color="secondaryGray.600" fontSize="sm">
             {filtered.length} of {users.length} clients
             {filtered.length !== users.length && " (filtered)"}

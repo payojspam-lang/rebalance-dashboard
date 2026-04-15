@@ -56,18 +56,19 @@ router.get('/:id', (req, res) => {
 // POST /api/recommendations/:id/transition
 // ---------------------------------------------------------------------------
 
-const ModificationSchema = z.object({
-  field: z.string(),
-  oldValue: z.unknown(),
-  newValue: z.unknown(),
-});
+// Bug 7 fix: `modifications` is a plain object per apidoc, not an array.
+// Schema matches: { newAction?: string, newQuantity?: number }
+const ModificationsSchema = z.object({
+  newAction:   z.enum(['BUY', 'SELL', 'HOLD', 'TRIM']).optional(),
+  newQuantity: z.number().nonnegative().optional(),
+}).optional();
 
 const TransitionSchema = z.object({
-  action: z.enum(['APPROVE', 'MODIFY', 'REJECT', 'RESET', 'START', 'COMPLETE']),
-  modifications: z.array(ModificationSchema).optional(),
-  rationale: z.string().optional(),
-  comment: z.string().optional(),
-  reason: z.string().optional(),
+  action:        z.enum(['APPROVE', 'MODIFY', 'REJECT', 'RESET', 'START', 'COMPLETE']),
+  modifications: ModificationsSchema,
+  rationale:     z.string().optional(),
+  comment:       z.string().optional(),
+  reason:        z.string().optional(),
 });
 
 router.post('/:id/transition', (req, res) => {
@@ -85,13 +86,25 @@ router.post('/:id/transition', (req, res) => {
   const performedBy = req.user as PublicUser;
   const id = req.params['id'] ?? '';
 
+  // Normalise modifications to the shape the service expects
+  const mods = result.data.modifications
+    ? [
+        ...(result.data.modifications.newAction
+          ? [{ field: 'action',   oldValue: undefined, newValue: result.data.modifications.newAction }]
+          : []),
+        ...(result.data.modifications.newQuantity !== undefined
+          ? [{ field: 'quantity', oldValue: undefined, newValue: result.data.modifications.newQuantity }]
+          : []),
+      ]
+    : undefined;
+
   try {
     const transitionResult = transitionRecommendation(id, {
-      action: result.data.action as TransitionAction,
-      modifications: result.data.modifications as Array<{ field: string; oldValue: unknown; newValue: unknown }> | undefined,
-      rationale: result.data.rationale,
-      comment: result.data.comment,
-      reason: result.data.reason,
+      action:        result.data.action as TransitionAction,
+      modifications: mods,
+      rationale:     result.data.rationale,
+      comment:       result.data.comment,
+      reason:        result.data.reason,
       performedBy,
     });
 

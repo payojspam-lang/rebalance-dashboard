@@ -9,9 +9,8 @@ router.get("/kpis", (_req, res) => {
             total_active_users: 1250,
             new_users_mtd: 47,
             new_users_ytd: 312,
-            churned_users_mtd: 5,
-            net_user_growth_mtd: 42,
-            net_user_growth_pct: 3.47
+            net_user_growth_mtd: 47,
+            net_user_growth_pct: 3.90
         },
         review_metrics: {
             new_user_reviews_pending: 12,
@@ -68,12 +67,12 @@ router.get("/kpis", (_req, res) => {
                 { month: "2026-05", aum: 84250000 }
             ],
             user_growth_last_6_months: [
-                { month: "2025-12", new: 38, churned: 4 },
-                { month: "2026-01", new: 41, churned: 6 },
-                { month: "2026-02", new: 55, churned: 3 },
-                { month: "2026-03", new: 49, churned: 7 },
-                { month: "2026-04", new: 52, churned: 5 },
-                { month: "2026-05", new: 47, churned: 5 }
+                { month: "2025-12", new: 38 },
+                { month: "2026-01", new: 41 },
+                { month: "2026-02", new: 55 },
+                { month: "2026-03", new: 49 },
+                { month: "2026-04", new: 52 },
+                { month: "2026-05", new: 47 }
             ]
         }
     });

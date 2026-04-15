@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useCallback, useMemo, useRef } from "react";
 import { mockRecommendations } from "views/admin/research-dashboard/variables/mockData";
 import { surbhiRecommendations } from "views/admin/research-dashboard/variables/mockSurbhiData";
+// R-001 fix: single source of truth for sell-side action types
+import { SELL_ACTIONS } from "utils/tradeConstants";
 
 const RecommendationsContext = createContext(null);
 
@@ -239,15 +241,19 @@ export function RecommendationsProvider({ children }) {
 
   // ── Batch operations (span ALL users) ──────────────────────────────────────
 
-  const startBatch = useCallback(() => {
+  // R-001 fix: SELL_ACTIONS imported from shared utils — no local redefinition.
+  // R-004 fix: tabType scopes which actions get batched per tab.
+  // "sell" → SELL/TRIM/TRIM/HOLD; "buy" → BUY only; undefined → all (legacy).
+  const startBatch = useCallback((tabType) => {
     setAllUserRecs((prev) => {
       const next = {};
       for (const [uid, recs] of Object.entries(prev)) {
-        next[uid] = recs.map((r) =>
-          r.status === "APPROVED"
-            ? { ...r, status: "IN_PROGRESS", batchedAt: new Date().toISOString() }
-            : r,
-        );
+        next[uid] = recs.map((r) => {
+          if (r.status !== "APPROVED") return r;
+          if (tabType === "sell" && !SELL_ACTIONS.has(r.recommendedAction)) return r;
+          if (tabType === "buy"  && r.recommendedAction !== "BUY") return r;
+          return { ...r, status: "IN_PROGRESS", batchedAt: new Date().toISOString() };
+        });
       }
       return next;
     });
@@ -258,17 +264,20 @@ export function RecommendationsProvider({ children }) {
       }
       return next;
     });
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const completeBatch = useCallback(() => {
+  // R-004 fix: completeBatch also scoped by tabType so uploading a buy response
+  // does not prematurely complete sell orders that are still in-flight.
+  const completeBatch = useCallback((tabType) => {
     setAllUserRecs((prev) => {
       const next = {};
       for (const [uid, recs] of Object.entries(prev)) {
-        next[uid] = recs.map((r) =>
-          r.status === "IN_PROGRESS"
-            ? { ...r, status: "COMPLETED", completedAt: new Date().toISOString() }
-            : r,
-        );
+        next[uid] = recs.map((r) => {
+          if (r.status !== "IN_PROGRESS") return r;
+          if (tabType === "sell" && !SELL_ACTIONS.has(r.recommendedAction)) return r;
+          if (tabType === "buy"  && r.recommendedAction !== "BUY") return r;
+          return { ...r, status: "COMPLETED", completedAt: new Date().toISOString() };
+        });
       }
       return next;
     });
@@ -279,7 +288,7 @@ export function RecommendationsProvider({ children }) {
       }
       return next;
     });
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const value = useMemo(
     () => ({

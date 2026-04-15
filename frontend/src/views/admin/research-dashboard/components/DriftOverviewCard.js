@@ -5,6 +5,8 @@ import Chart from "react-apexcharts";
 
 export default function DriftOverviewCard({ users = [] }) {
   const textColor = useColorModeValue("secondaryGray.900", "white");
+  const dataLabelColor = useColorModeValue("#334155", "#E2E8F0");
+  const tooltipTheme = useColorModeValue("light", "dark");
 
   // Top 5 users by drift, descending
   const top5 = useMemo(() => {
@@ -34,7 +36,7 @@ export default function DriftOverviewCard({ users = [] }) {
       enabled: true,
       formatter: (val) => `${val.toFixed(2)}%`,
       offsetX: 28,
-      style: { fontSize: "11px", colors: ["#334155"] },
+      style: { fontSize: "11px", colors: [dataLabelColor] },
     },
     xaxis: {
       categories,
@@ -59,10 +61,10 @@ export default function DriftOverviewCard({ users = [] }) {
     colors: ["#FF5252"],
     legend: { show: false },
     tooltip: {
-      theme: "light",
+      theme: tooltipTheme,
       y: { formatter: (val) => `${val.toFixed(2)}%` },
     },
-  }), [categories]);
+  }), [categories, dataLabelColor, tooltipTheme]);
 
   const series = useMemo(() => [
     { name: "Drift %", data: driftValues },

@@ -7,6 +7,7 @@
 
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import rebalanceRoutes from './routes/rebalance';
 import authRoutes from './routes/auth';
 import portfoliosRoutes from './routes/portfolios';
@@ -29,9 +30,11 @@ app.use(cors({
   origin: process.env['CORS_ORIGIN'] ?? 'http://localhost:3000',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true, // required for HttpOnly cookies
 }));
 
-app.use(express.json({ limit: '2mb' })); // portfolio payloads can be large
+app.use(cookieParser());
+app.use(express.json({ limit: '2mb' }));
 
 // ---------------------------------------------------------------------------
 // Routes

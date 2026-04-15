@@ -4,7 +4,7 @@ exports.aumSnapshots = exports.rebalanceActions = exports.portfolios = exports.u
 const pg_core_1 = require("drizzle-orm/pg-core");
 // Enums
 exports.riskMandateEnum = (0, pg_core_1.pgEnum)("risk_mandate", ["Conservative", "Low", "Moderate", "High", "Aggressive"]);
-exports.userStatusEnum = (0, pg_core_1.pgEnum)("user_status", ["active", "inactive", "churned"]);
+exports.userStatusEnum = (0, pg_core_1.pgEnum)("user_status", ["active", "inactive"]);
 exports.onboardingStatusEnum = (0, pg_core_1.pgEnum)("onboarding_status", ["pending_review", "review_in_progress", "onboarded"]);
 exports.reviewTypeEnum = (0, pg_core_1.pgEnum)("review_type", ["new_user_review", "monthly_review"]);
 exports.reviewStatusEnum = (0, pg_core_1.pgEnum)("review_status", ["pending", "in_progress", "completed", "spillover"]);
@@ -21,7 +21,6 @@ exports.users = (0, pg_core_1.pgTable)("users", {
     onboardingStatus: (0, exports.onboardingStatusEnum)("onboarding_status").notNull().default("pending_review"),
     createdAt: (0, pg_core_1.timestamp)("created_at").defaultNow().notNull(),
     updatedAt: (0, pg_core_1.timestamp)("updated_at").defaultNow().notNull(),
-    churnedAt: (0, pg_core_1.timestamp)("churned_at"),
 });
 // Table: user_reviews
 exports.userReviews = (0, pg_core_1.pgTable)("user_reviews", {

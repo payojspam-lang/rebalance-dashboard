@@ -4,20 +4,29 @@ import Navbar from 'components/navbar/NavbarAdmin.js';
 import Sidebar from 'components/sidebar/Sidebar.js';
 import { SidebarContext } from 'contexts/SidebarContext';
 import React, { useState } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import routes from 'routes.js';
 
 export default function AdminLayout() {
   const [toggleSidebar, setToggleSidebar] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { onOpen } = useDisclosure();
+  const location = useLocation(); // reactive — re-renders on every navigation
 
+  // Derive the active route name from the current pathname (not window.location.href)
   const getActiveRoute = (routes) => {
-    for (let i = 0; i < routes.length; i++) {
-      if (window.location.href.indexOf(routes[i].layout + routes[i].path) !== -1) {
-        return routes[i].name;
+    // Sort by path length descending so more specific paths (e.g. /rebalance/user/:id)
+    // match before shorter prefixes (e.g. /rebalance)
+    const sorted = [...routes].sort((a, b) => b.path.length - a.path.length);
+    for (const route of sorted) {
+      const fullPath = route.layout + route.path;
+      // Strip dynamic segments (:userId) before matching
+      const staticPart = fullPath.split('/:')[0];
+      if (location.pathname.startsWith(staticPart)) {
+        return route.name;
       }
     }
-    return 'Vantage Rebalancing';
+    return 'Aegis Rebalance Engine';
   };
 
   const getRoutes = (routes) =>
@@ -28,12 +37,15 @@ export default function AdminLayout() {
       return null;
     });
 
+  const SIDEBAR_W    = sidebarCollapsed ? '72px' : '290px';
+  const CONTENT_W    = `calc(100% - ${SIDEBAR_W})`;
+
   document.documentElement.dir = 'ltr';
 
   return (
     <Box>
-      <SidebarContext.Provider value={{ toggleSidebar, setToggleSidebar }}>
-        <Sidebar routes={routes} display="none" />
+      <SidebarContext.Provider value={{ toggleSidebar, setToggleSidebar, sidebarCollapsed, setSidebarCollapsed }}>
+        <Sidebar routes={routes} display="none" collapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed((p) => !p)} />
         <Box
           float="right"
           minHeight="100vh"
@@ -41,12 +53,9 @@ export default function AdminLayout() {
           overflow="auto"
           position="relative"
           maxHeight="100%"
-          w={{ base: '100%', xl: 'calc(100% - 290px)' }}
-          maxWidth={{ base: '100%', xl: 'calc(100% - 290px)' }}
-          transition="all 0.33s cubic-bezier(0.685, 0.0473, 0.346, 1)"
-          transitionDuration=".2s, .2s, .35s"
-          transitionProperty="top, bottom, width"
-          transitionTimingFunction="linear, linear, ease"
+          w={{ base: '100%', xl: CONTENT_W }}
+          maxWidth={{ base: '100%', xl: CONTENT_W }}
+          transition="all 0.25s ease"
         >
           <Portal>
             <Navbar
@@ -54,7 +63,7 @@ export default function AdminLayout() {
               brandText={getActiveRoute(routes)}
             />
           </Portal>
-          <Box mx="auto" p={{ base: '20px', md: '30px' }} pe="20px" minH="100vh" pt="50px">
+          <Box mx="auto" p={{ base: '20px', md: '30px' }} pe="20px" minH="100vh" pt={{ base: "140px", md: "100px" }}>
             <Routes>
               {getRoutes(routes)}
               <Route path="/" element={<Navigate to="/admin/research-dashboard" replace />} />

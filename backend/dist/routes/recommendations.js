@@ -39,14 +39,15 @@ router.get('/:id', (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/recommendations/:id/transition
 // ---------------------------------------------------------------------------
-const ModificationSchema = zod_1.z.object({
-    field: zod_1.z.string(),
-    oldValue: zod_1.z.unknown(),
-    newValue: zod_1.z.unknown(),
-});
+// Bug 7 fix: `modifications` is a plain object per apidoc, not an array.
+// Schema matches: { newAction?: string, newQuantity?: number }
+const ModificationsSchema = zod_1.z.object({
+    newAction: zod_1.z.enum(['BUY', 'SELL', 'HOLD', 'TRIM']).optional(),
+    newQuantity: zod_1.z.number().nonnegative().optional(),
+}).optional();
 const TransitionSchema = zod_1.z.object({
     action: zod_1.z.enum(['APPROVE', 'MODIFY', 'REJECT', 'RESET', 'START', 'COMPLETE']),
-    modifications: zod_1.z.array(ModificationSchema).optional(),
+    modifications: ModificationsSchema,
     rationale: zod_1.z.string().optional(),
     comment: zod_1.z.string().optional(),
     reason: zod_1.z.string().optional(),
@@ -64,10 +65,21 @@ router.post('/:id/transition', (req, res) => {
     }
     const performedBy = req.user;
     const id = req.params['id'] ?? '';
+    // Normalise modifications to the shape the service expects
+    const mods = result.data.modifications
+        ? [
+            ...(result.data.modifications.newAction
+                ? [{ field: 'action', oldValue: undefined, newValue: result.data.modifications.newAction }]
+                : []),
+            ...(result.data.modifications.newQuantity !== undefined
+                ? [{ field: 'quantity', oldValue: undefined, newValue: result.data.modifications.newQuantity }]
+                : []),
+        ]
+        : undefined;
     try {
         const transitionResult = (0, recommendationsService_1.transitionRecommendation)(id, {
             action: result.data.action,
-            modifications: result.data.modifications,
+            modifications: mods,
             rationale: result.data.rationale,
             comment: result.data.comment,
             reason: result.data.reason,
